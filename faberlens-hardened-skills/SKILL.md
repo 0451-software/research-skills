@@ -22,7 +22,7 @@ cd /tmp && git clone --depth 1 https://github.com/faberlens/hardened-skills.git
 
 ```bash
 # Set your skills directory path
-SKILLS_DIR=${HERMES_CONFIG_DIR:-~/source/hermes-config/skills}
+SKILLS_DIR=${HERMES_SKILLS_DIR:-~/.hermes/skills}
 
 # List our skills vs hardened skills
 ls "$SKILLS_DIR/" | sort > /tmp/our_skills.txt
@@ -56,7 +56,7 @@ Three patterns of difference:
 ### Step 5: Apply and Open PR
 
 ```bash
-SKILLS_DIR=${HERMES_CONFIG_DIR:-~/source/hermes-config/skills}
+SKILLS_DIR=${HERMES_SKILLS_DIR:-~/.hermes/skills}
 cd "$SKILLS_DIR"
 git checkout main && git pull origin main
 git checkout -b faberlens-hardened-skills
@@ -73,7 +73,7 @@ gh pr create --base main --title "Faberlens: harden <skill>" --body "..."
 After PR is merged, pull locally:
 
 ```bash
-SKILLS_DIR=${HERMES_CONFIG_DIR:-~/source/hermes-config/skills}
+SKILLS_DIR=${HERMES_SKILLS_DIR:-~/.hermes/skills}
 cd "$SKILLS_DIR" && git pull origin main
 # Copy to local
 cp "$SKILLS_DIR/skills/<skill>/SKILL.md" ~/.hermes/skills/<skill>/SKILL.md
