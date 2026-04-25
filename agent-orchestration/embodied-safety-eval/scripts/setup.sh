@@ -1,6 +1,6 @@
 #!/bin/bash
 # Embodied Planning Safety Eval Skill — Dependency Verification
-# Run: bash .hermes/skills/embodied-planning-safety-eval/scripts/setup.sh
+# Run: bash .hermes/skills/embodied-safety-eval/scripts/setup.sh
 
 set -euo pipefail
 

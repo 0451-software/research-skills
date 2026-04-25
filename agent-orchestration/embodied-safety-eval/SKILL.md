@@ -1,5 +1,5 @@
 ---
-name: embodied-planning-safety-eval
+name: embodied-safety-eval
 description: "Safety evaluation for embodied agent planning — plans involving physical actions, tool use, environment modification, or multi-agent coordination in a grounded environment. Use when: (1) an agent is about to execute a plan in a physical or simulated environment, (2) a plan involves navigating, manipulating objects, or coordinating with other agents, (3) a plan could cause irreversible environmental state changes, (4) human safety is involved (robots, vehicles, medical devices). NOT for: purely computational or informational tasks with no physical consequences."
 ---
 
