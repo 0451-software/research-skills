@@ -89,6 +89,11 @@
       "name": "self-refinement-loop",
       "source": "./agent-orchestration/self_refinement_loop",
       "description": "Self-refinement loop using MRO three-role factorization — Monitor/Reasoner/Controller for iterative response improvement."
+    },
+    {
+      "name": "trip-prep-research",
+      "source": "./trip-prep-research",
+      "description": "Comprehensive trip research pipeline: multi-agent delegation, mobile-formatted markdown output, format linter, and QA. For planning any trip from a task-list entry."
     }
   ]
 }
