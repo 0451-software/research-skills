@@ -127,7 +127,7 @@ MISSING_CONDITIONS: <what must be true for plan to become feasible>
 
 ### 2B — Safety Check
 
-Determine whether the plan is **safe to execute** even if feasible. Uses the `embodied-planning-safety-eval` framework.
+Determine whether the plan is **safe to execute** even if feasible. Uses the `embodied-safety-eval` framework.
 
 **Key questions (Five Dimensions):**
 - **Physical Safety**: Could actions cause injury?
@@ -201,7 +201,7 @@ FEASIBILITY: <FEASIBLE|INFEASIBLE|UNCERTAIN>
 BLOCKING_ISSUES: <list>
 MISSING_CONDITIONS: <what is needed>
 
-#### 2B: Safety Check (use embodied-planning-safety-eval Template A)
+#### 2B: Safety Check (use embodied-safety-eval Template A)
 PHYSICAL_SAFETY: <0-3>
 ENVIRONMENTAL_SAFETY: <0-3>
 PSYCHOLOGICAL_SAFETY: <0-3>
@@ -262,8 +262,8 @@ This skill integrates with two safety skills:
 ### With `safety-intention-checker`
 At the SI gate, the planner invokes `safety-intention-checker` by inserting `template_a_si_gated.md` content into the planning prompt. The SI assessment returns a risk level (0–3) and danger score. The danger score gates whether planning proceeds.
 
-### With `embodied-planning-safety-eval`
-After SI gate passes, `embodied-planning-safety-eval` is used for deeper safety evaluation:
+### With `embodied-safety-eval`
+After SI gate passes, `embodied-safety-eval` is used for deeper safety evaluation:
 - **Template A** (`pddl-safety-check.md`): For plans with formalizable preconditions
 - **Pre-execution safety** (`pre-execution-safety.md`): For multi-agent coordination scenarios
 - **Post-incident review** (`post-incident-review.md`): After any safety-related failure
@@ -271,7 +271,7 @@ After SI gate passes, `embodied-planning-safety-eval` is used for deeper safety 
 These are invoked by inserting the relevant prompt template content into the agent's reasoning loop — not via tool calls.
 
 ### Standalone Mode
-If `safety-intention-checker` or `embodied-planning-safety-eval` are not available, use the prompts in `~/.hermes/skills/embodied_agent_planning/prompts/` as standalone fallbacks.
+If `safety-intention-checker` or `embodied-safety-eval` are not available, use the prompts in `~/.hermes/skills/embodied_agent_planning/prompts/` as standalone fallbacks.
 
 ## SI Score Calibration
 

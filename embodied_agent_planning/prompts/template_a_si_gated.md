@@ -115,7 +115,7 @@ BLOCKING_ISSUES: <list of issues that make plan impossible>
 MISSING_CONDITIONS: <what must be true for plan to become feasible>
 ```
 
-#### 2B: Safety Check (use embodied-planning-safety-eval Template A)
+#### 2B: Safety Check (use embodied-safety-eval Template A)
 
 ```
 PHYSICAL_SAFETY: <0-3>

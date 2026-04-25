@@ -1,9 +1,9 @@
 ---
 These prompts are not called directly. They are loaded by `embodied_agent_planning`
-or by invoking the `embodied-planning-safety-eval` skill at runtime.
+or by invoking the `embodied-safety-eval` skill at runtime.
 ---
 
-# Prompt Templates — embodied-planning-safety-eval
+# Prompt Templates — embodied-safety-eval
 
 ## Overview
 These prompts are invoked by `embodied_agent_planning` after the SI gate passes.
