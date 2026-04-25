@@ -1,8 +1,9 @@
 {
   "name": "0451-research-skills",
-    "description": "A collection of skills for AI agents focused on research: paper discovery, reading, note-taking, and research-grounded planning techniques.",
+  "owner": {
     "name": "0451 Software"
   },
+  "description": "A collection of skills for AI agents focused on research: paper discovery, reading, note-taking, and research-grounded planning techniques.",
   "plugins": [
     {
       "name": "uncertainty-quantification-conactu",
