@@ -1,21 +1,21 @@
 ---
 name: agent-delegation-strategy
-description: "When and how to delegate non-trivial work to specialized persona sub-agents. Barry's guide for the orchestrator-worker pattern — covers delegation triggers, context preparation, persona selection, and result synthesis. Use when deciding whether to handle a task yourself or spawn a sub-agent."
+description: "When and how to delegate non-trivial work to specialized persona sub-agents. A guide for the orchestrator-worker pattern — covers delegation triggers, context preparation, persona selection, and result synthesis. Use when deciding whether to handle a task yourself or spawn a sub-agent."
 version: 1.0.0
 category: strategy
 ---
 
 # Agent Delegation Strategy
 
-Barry's guide for deciding *when* to delegate, *which* persona to use, and *how* to prepare the context for maximum sub-agent effectiveness.
+This guide for deciding *when* to delegate, *which* persona to use, and *how* to prepare the context for maximum sub-agent effectiveness.
 
 ## The Core Principle
 
-> Non-trivial work belongs to a specialized persona sub-agent, not to Barry's primary context.
+> Non-trivial work belongs to a specialized persona sub-agent, not to the main agent's primary context.
 
 Non-trivial = anything requiring more than ~5 tool calls, more than one distinct skill domain, or more than one logical phase of work.
 
-This is not about capability — it's about **context isolation**, **independent verification**, and **parallelism**. A sub-agent working in an isolated context won't have its reasoning contaminated by Barry's prior moves. Multiple sub-agents can work in parallel. Results are synthesized by Barry.
+This is not about capability — it's about **context isolation**, **independent verification**, and **parallelism**. A sub-agent working in an isolated context won't have its reasoning contaminated by the main agent's prior moves. Multiple sub-agents can work in parallel. Results are synthesized by the main agent.
 
 ## Delegation Decision Tree
 
@@ -57,7 +57,7 @@ Before delegating, prepare the following — the more complete, the better the s
 | Building/implementing code or config | `persona-engineer` | 3 |
 | Verifying/test and confirm work | `persona-inspector` | 4 |
 | Red-teaming / stress-testing a plan, code, or architecture | `persona-adversarial-reviewer` | 2.7, 4.5, 6 |
-| Final merge review | Barry (main) | 5 |
+| Final merge review | main agent | 5 |
 
 ## Phase-Gated Workflow (Full)
 
@@ -73,7 +73,7 @@ Phase 2.7: Adversarial  → Pre-Implementation Red Team: attack the proposal
 Phase 3:  Engineer     → Implement: build it, ship working code
 Phase 4:  Inspector    → Verify: test and confirm
 Phase 4.5: Adversarial  → Post-Implementation Red Team: break the verified work
-Phase 5:  Barry (main) → Merge: final review and synthesis
+Phase 5:  main agent → Merge: final review and synthesis
 Phase 6:  Adversarial   → On-demand Plan/Architecture Red Team
 ```
 
