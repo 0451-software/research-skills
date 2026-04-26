@@ -1,0 +1,99 @@
+{
+  "name": "0451-research-skills",
+  "owner": {
+    "name": "0451 Software"
+  },
+  "description": "A collection of skills for AI agents focused on research: paper discovery, reading, note-taking, and research-grounded planning techniques.",
+  "plugins": [
+    {
+      "name": "uncertainty-quantification-conactu",
+      "source": "./uncertainty-quantification-conactu",
+      "description": "Structured uncertainty quantification for agent outputs. CONACTU 4-axis confidence framework: Evidence, Model Fidelity, Completeness, Stability."
+    },
+    {
+      "name": "embodied-agent-planning",
+      "source": "./embodied_agent_planning",
+      "description": "Embodied agent planning with integrated safety intention (SI) scoring and orthogonal feasibility+safety checks. For robots, vehicles, drones, game agents."
+    },
+    {
+      "name": "arxiv",
+      "source": "./arxiv",
+      "description": "Search and retrieve academic papers from arXiv using their free REST API. No API key needed. Search by keyword, author, category, or ID."
+    },
+    {
+      "name": "arxiv-research-to-agent-notes",
+      "source": "./arxiv-research-to-agent-notes",
+      "description": "Process arXiv PDFs into agent-notes — pymupdf4llm conversion, spawn 1 researcher per paper, max 3 concurrent, commit plans immediately."
+    },
+    {
+      "name": "llm-wiki",
+      "source": "./llm-wiki",
+      "description": "Karpathy's LLM Wiki — build and maintain a persistent, interlinked markdown knowledge base from LLM-related sources."
+    },
+    {
+      "name": "research-paper-to-agent-plan",
+      "source": "./research-paper-to-agent-plan",
+      "description": "Convert research PDFs to markdown (pymupdf4llm, not marker on M4), spawn researcher sub-agents, commit plans to agent-notes."
+    },
+    {
+      "name": "agent-delegation-strategy",
+      "source": "./agent-orchestration/agent-delegation-strategy",
+      "description": "When and how to delegate non-trivial work to specialized persona sub-agents. Covers delegation triggers, context preparation, and result synthesis."
+    },
+    {
+      "name": "embodied-safety-eval",
+      "source": "./agent-orchestration/embodied-safety-eval",
+      "description": "Safety evaluation for embodied agent plans — pre-execution checks for plans involving physical actions, tool use, or environment modification."
+    },
+    {
+      "name": "faberlens-hardened-skills",
+      "source": "./agent-orchestration/faberlens-hardened-skills",
+      "description": "Apply Faberlens behavioral safety hardening to skills by comparing against the hardened-skills repo and selectively adopting guardrails."
+    },
+    {
+      "name": "metacognitive-mro-prompts",
+      "source": "./agent-orchestration/metacognitive-mro-prompts",
+      "description": "Metacognitive monitoring and regulation prompts — MRO self-awareness loops, bias detection, mid-execution plan revision."
+    },
+    {
+      "name": "persona-adversarial-review",
+      "source": "./agent-orchestration/persona-adversarial-review",
+      "description": "Adversarial red-team persona — find failure modes, stress-test assumptions, play devil's advocate."
+    },
+    {
+      "name": "persona-engineer",
+      "source": "./agent-orchestration/persona-engineer",
+      "description": "Implementation persona — build working code with tests, practical and opinionated."
+    },
+    {
+      "name": "persona-inspector",
+      "source": "./agent-orchestration/persona-inspector",
+      "description": "QA/inspection persona — verification, anti-pattern detection, challenge gate."
+    },
+    {
+      "name": "persona-researcher",
+      "source": "./agent-orchestration/persona-researcher",
+      "description": "Research persona — deep dives, literature synthesis, domain reconnaissance."
+    },
+    {
+      "name": "psmas-dag-to-phases",
+      "source": "./agent-orchestration/psmas-dag-to-phases",
+      "description": "Transform PSMAS DAGs of tasks into executable phases with checkpoint validation. For complex multi-step plans with dependency verification."
+    },
+    {
+      "name": "safety-intention-checker",
+      "source": "./agent-orchestration/safety-intention-checker",
+      "description": "Evaluate whether a task request reflects benign, ambiguous, or potentially harmful intention before taking action."
+    },
+    {
+      "name": "self-refinement-loop",
+      "source": "./agent-orchestration/self_refinement_loop",
+      "description": "Self-refinement loop using MRO three-role factorization — Monitor/Reasoner/Controller for iterative response improvement."
+    },
+    {
+      "name": "trip-prep-research",
+      "source": "./trip-prep-research",
+      "description": "Comprehensive trip research pipeline: multi-agent delegation, mobile-formatted markdown output, format linter, and QA. For planning any trip from a task-list entry."
+    }
+  ]
+}
