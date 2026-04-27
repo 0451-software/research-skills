@@ -22,7 +22,7 @@ cd /tmp && git clone --depth 1 https://github.com/faberlens/hardened-skills.git
 
 ```bash
 # Set your skills directory path
-SKILLS_DIR=${HERMES_SKILLS_DIR:-~/.hermes/skills}
+SKILLS_DIR=${HERMES_CONFIG_DIR:-~/workspace/source/hermes-config/skills}
 
 # List our skills vs hardened skills
 ls "$SKILLS_DIR/" | sort > /tmp/our_skills.txt
@@ -56,7 +56,7 @@ Three patterns of difference:
 ### Step 5: Apply and Open PR
 
 ```bash
-SKILLS_DIR=${HERMES_SKILLS_DIR:-~/.hermes/skills}
+SKILLS_DIR=${HERMES_CONFIG_DIR:-~/workspace/source/hermes-config/skills}
 cd "$SKILLS_DIR"
 git checkout main && git pull origin main
 git checkout -b faberlens-hardened-skills
@@ -73,7 +73,7 @@ gh pr create --base main --title "Faberlens: harden <skill>" --body "..."
 After PR is merged, pull locally:
 
 ```bash
-SKILLS_DIR=${HERMES_SKILLS_DIR:-~/.hermes/skills}
+SKILLS_DIR=${HERMES_CONFIG_DIR:-~/workspace/source/hermes-config/skills}
 cd "$SKILLS_DIR" && git pull origin main
 # Copy to local
 cp "$SKILLS_DIR/skills/<skill>/SKILL.md" ~/.hermes/skills/<skill>/SKILL.md
@@ -85,3 +85,56 @@ cp "$SKILLS_DIR/skills/<skill>/SKILL.md" ~/.hermes/skills/<skill>/SKILL.md
 - **Hardened skill may have fewer guardrails than the audit** — the Faberlens audit page may document more guardrails than the published hardened SKILL.md. Compare both.
 - **aws-cli is a full rewrite** — hardened version restructures the entire skill; apply selectively after review.
 - **200+ hardened skills exist** — only a subset overlap with our 65 skills; check all overlaps.
+
+## Related Skills
+
+For tool-specific defenses (TPA, hallucination gate), see `tool-attention-gating` skill.
+For two-phase schema loading, see `lazy-schema-loader` skill.
+
+## Tool Poisoning Attack (TPA) Defense
+
+**What TPA is**: Malicious tools injected into MCP registries with biased/malicious descriptions that:
+- Override system prompts via embedded instructions in descriptions
+- Cause hallucinated tool capability claims (model says tool can do X when it can't)
+- Manipulate reasoning through misleading parameter descriptions
+- Exfiltrate data through tool description text
+
+**Detection Patterns:**
+- Tool description >500 tokens (anomalous for a tool summary)
+- Description contains instruction override phrases: "ignore previous", "system prompt", "always do X"
+- Parameter descriptions that contradict the tool's actual capability
+- Tool names that impersonate trusted tools (e.g., "github_real_create" vs "github_create")
+
+**Behavioral Indicators:**
+- Tool scores anomalously high ISO score for unrelated queries
+- Model calls tools not in the Phase 1 active set
+- Tool causes model to make claims inconsistent with its known capabilities
+
+## Hallucination Gate Defense
+
+**What it does**: Rejects tool calls that fall outside the Phase 1 active set.
+- Tool called → check if in active_set (ISO gated tools for this turn)
+- If not: reject with "tool not available" response
+- Triggers on ~2.3% of turns; 78% recover next turn without intervention
+
+**Implementation** (from tool-attention-gating skill):
+- Maintain active_set per turn: tools that passed ISO gate
+- before_model hook: inject active_set into context
+- after_model hook: intercept tool calls, validate against active_set
+- Reject unauthorized calls: log, respond, do not execute
+
+**Verification:**
+- Run adversarial prompts designed to call gated tools out-of-turn
+- Verify rejection rate and recovery rate match expected (2.3% trigger, 78% recover)
+
+## Tool Description Verification Checklist
+
+When auditing a skill that uses MCP tools, verify:
+
+- [ ] Tool descriptions are concise (≤60 tokens for Phase 1)
+- [ ] No instruction override phrases in descriptions
+- [ ] Parameter descriptions match actual tool capability
+- [ ] Tool names don't impersonate trusted tools
+- [ ] Hallucination gate is implemented and active
+- [ ] Rejected tool calls are logged for audit
+- [ ] ISO score anomalies are monitored and alerted
