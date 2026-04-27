@@ -1,6 +1,0 @@
-{
-  "identifier": "trip-prep-research",
-  "name": "Trip Prep Research",
-  "description": "Comprehensive trip research pipeline: multi-agent delegation, mobile-formatted markdown output, format linter, and QA. Use when planning any trip from a task-list entry.",
-  "source": "./trip-prep-research"
-}
