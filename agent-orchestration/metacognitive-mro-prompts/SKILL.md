@@ -5,17 +5,17 @@ description: "Metacognitive monitoring and regulation prompts for Hermes agents.
 
 # Metacognitive MRO Prompts
 
-A library of prompts for **M**onitoring, **R**egulation, and **O**ptimization of an agent's own cognitive processes. Use these to inject structured self-reflection into agent reasoning loops without breaking the primary task flow.
+Prompts for **M**onitoring, **R**egulation, and **O**ptimization of agent cognitive processes. Inject structured self-reflection into reasoning loops without breaking task flow.
 
 ## When to Use
 
-- Agent reaches a checkpoint and needs to verify its reasoning before proceeding
-- A sub-agent returns unexpected or contradictory output
-- The agent hits a dead-end and needs to backtrack
-- A task is taking significantly more iterations than expected
-- The agent is uncertain which of several approaches to take
-- Bias detection: agent notices a pattern in its own responses that might indicate a systematic error
-- Recovery: agent needs to diagnose what went wrong after a failed attempt
+- Checkpoint: verify reasoning before proceeding
+- Sub-agent returns unexpected/contradictory output
+- Dead-end: need to backtrack
+- Task taking too many iterations
+- Uncertain which approach to take
+- Bias detection: pattern in responses suggests systematic error
+- Recovery: diagnose what went wrong
 
 ## Prompt Library
 
@@ -150,7 +150,7 @@ For the DON'T KNOW items:
 ## Usage Patterns
 
 ### Inline Injection (Recommended)
-Insert these prompts at natural breakpoints in task execution rather than as separate turns. Example:
+Insert prompts at natural breakpoints, not as separate turns. Example:
 
 ```
 [After step 3 of 7]
@@ -159,39 +159,32 @@ Insert these prompts at natural breakpoints in task execution rather than as sep
 ```
 
 ### Sub-agent Delegation
-Spawn a focused sub-agent with the RCA prompt when a primary task has failed. Set its context to only the failed task's details — do not let it see the full conversation history.
+Spawn focused sub-agent with RCA prompt when primary task fails. Set context to only failed task details — no full conversation history.
 
 ### Delegation Triggers (D1–D4)
-Apply these automatically when working on non-trivial tasks:
+Auto-apply on non-trivial tasks:
 
-- **D1 (Task complexity):** 3+ distinct phases or 5+ tool calls → delegate subsequent phases to persona-agent
-- **D2 (Expertise match):** Research, adversarial review, or verification → use persona-researcher / persona-adversarial-reviewer / persona-inspector
-- **D3 (Parallelization):** Multiple independent workstreams → batch delegate up to 3 sub-agents concurrently
-- **D4 (Escalation):** Failure mode detected, high uncertainty, or blocked → delegate to appropriate persona with full context
+- **D1 (Complexity):** 3+ phases or 5+ tool calls → delegate subsequent phases to persona-agent
+- **D2 (Expertise):** Research, adversarial review, verification → use `persona-researcher` / `persona-adversarial-reviewer` / `persona-inspector`
+- **D3 (Parallelization):** Independent workstreams → batch delegate up to 3 sub-agents concurrently
+- **D4 (Escalation):** Failure mode, high uncertainty, or blocked → delegate with full context
 
-See `agent-delegation-strategy` for the full decision tree and context prep checklist.
+See `agent-delegation-strategy` for decision tree and context prep checklist.
 
 ### Scheduled Self-Audit
-At intervals (e.g., every 20 turns), inject the cognitive bias scan proactively, not just when errors are apparent. Systemic bias detection catches drift before it causes failures.
+Every ~20 turns, inject cognitive bias scan proactively. Systemic detection catches drift before failure.
 
 ## Pitfalls
 
-1. **Over-using metacognitive prompts**: Excessive self-checks fragment task focus and slow execution. Reserve for genuine decision points or after failures.
-
-2. **Using these as decoration**: The output of a metacognitive prompt must actually change behavior. If the scan finds a bias but the agent proceeds identically, the prompt was wasted.
-
-3. **Confusing reflection with execution**: Metacognitive prompts are for planning and evaluation, not for generating the primary output. Do not let the self-analysis become the deliverable.
-
-4. **Not logging outcomes**: The results of RCA prompts should be logged for pattern detection across sessions. Recurring root causes reveal systemic issues.
-
-5. **Prompt injection without context**: The prompts above require the `{placeholder}` fields to be filled. A bare prompt injection without task-specific context produces generic output.
+1. **Over-use fragments focus**: Reserve for genuine decision points or failures only.
+2. **Decoration doesn't work**: Prompt output must change behavior. If you detect bias but proceed same way, prompt was wasted.
+3. **Reflection ≠ execution**: Metacognitive prompts are for planning/evaluation, not primary output. Self-analysis must not become the deliverable.
+4. **Log outcomes**: Log RCA results for pattern detection. Recurring root causes reveal systemic issues.
+5. **Fill placeholders**: Bare prompt injection without `{placeholder}` fields filled produces generic output.
 
 ## Verification
 
-1. **Convergence check validation**: After using the convergence check prompt in a real task, verify the CONVERGENCE_STATUS and ADJUSTMENT fields were accurate by comparing to the actual task outcome.
-
-2. **RCA quality review**: After an RCA, review whether the identified root cause was specific and correctable, not merely a restatement of the symptom.
-
-3. **Bias detection accuracy**: Run the bias checklist on a sample of recent tasks. For any bias flagged, check whether the reasoning actually changed after detection.
-
-4. **Regression test suite**: Maintain a set of 5 known-failure scenarios. After updating the prompt library, re-run the RCA prompt on each and verify root causes are still correctly identified.
+1. **Convergence validation**: After use, compare CONVERGENCE_STATUS and ADJUSTMENT to actual task outcome.
+2. **RCA quality**: Check whether root cause was specific/correctable, not just symptom restatement.
+3. **Bias accuracy**: Run bias checklist on sample tasks. For flagged biases, verify reasoning actually changed.
+4. **Regression tests**: Maintain 5 known-failure scenarios. After updates, re-run RCA and verify root causes still correct.

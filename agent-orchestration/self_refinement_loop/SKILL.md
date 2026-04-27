@@ -1,6 +1,11 @@
 ---
 name: self_refinement_loop
 description: "Self-refinement loop skill using MRO (Monitor/Reasoner/Controller) three-role factorization. Use when iteratively improving a response, catching errors before they propagate, or recovering from dead-ends. Integrates with metacognitive-mro-prompts templates for structured self-regulation."
+version: 1.0.0
+metadata:
+  hermes:
+    tags: [reasoning, self-improvement, loop, metacognition, MRO]
+    category: strategy
 ---
 
 # Self-Refinement Loop (MRO)
@@ -44,20 +49,7 @@ Each refinement cycle consists of three phases:
 | `prompts/monitor.md` | Monitor | Issue detection and quality evaluation |
 | `prompts/reasoner.md` | Reasoner | Root-cause diagnosis and revision generation |
 | `prompts/controller.md` | Controller | Validation and commitment of refined output |
-| `prompts/loop_manager.md` | Loop Manager | Exit criteria evaluation and cycle orchestration |
-
-## Integration with metacognitive-mro-prompts
-
-This skill is designed to compose with the metacognitive-mro-prompts templates:
-
-- **Pre-execution**: Use `metacognitive-mro-prompts/prompts/pre-execution-check.md` before the first refinement cycle to validate the plan
-- **Mid-loop**: Use `metacognitive-mro-prompts/prompts/mid-execution-check.md` if the loop stalls or diverges
-- **Post-loop**: Use `metacognitive-mro-prompts/prompts/post-failure-analysis.md` if the loop fails to converge
-- **Bias detection**: Use the bias detection prompts documented in
-`metacognitive-mro-prompts/SKILL.md` (Section 4, lines 88–106) —
-these are inline prompts, not separate files. The Monitor role in this
-loop should cross-reference those bias patterns when diagnosing
-Reasoner output.
+|| `prompts/loop_manager.md` | Loop Manager | Exit criteria evaluation and cycle orchestration |
 
 ## Usage
 
@@ -86,6 +78,15 @@ For simpler use cases, inject the three-role factorization inline:
 → CONTROLLER: Validate and commit changes
 [Refined output]
 ```
+
+## Integration with metacognitive-mro-prompts
+
+This skill is designed to compose with the metacognitive-mro-prompts templates:
+
+- **Pre-execution**: Use `metacognitive-mro-prompts/prompts/pre-execution-check.md` before the first refinement cycle to validate the plan
+- **Mid-loop**: Use `metacognitive-mro-prompts/prompts/mid-execution-check.md` if the loop stalls or diverges
+- **Post-loop**: Use `metacognitive-mro-prompts/prompts/post-failure-analysis.md` if the loop fails to converge
+- **Bias detection**: Use the bias detection prompts documented in `metacognitive-mro-prompts/SKILL.md` Section 4 (Bias Detection Prompts) — these are inline prompts, not separate files. The Monitor role in this loop should cross-reference those bias patterns when diagnosing Reasoner output.
 
 ## Exit Criteria
 
