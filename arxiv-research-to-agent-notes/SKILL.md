@@ -1,134 +1,72 @@
 ---
 name: arxiv-research-to-agent-notes
-description: Batch process arXiv PDFs into research notes — PDF extraction, parallel researcher agents, implementation plans.
-version: 1.0.0
-license: MIT
+description: Process arXiv PDFs into Hermes agent-notes — pymupdf4llm conversion, spawn 1 researcher per paper, max 3 concurrent, commit plans immediately.
+related_skills:
+  - research-paper-to-agent-plan  # deprecated, merged into this skill
+  - marker-pdf-conversion         # platform-specific PDF extraction guidance
 ---
 
-# ArXiv Research → Notes Pipeline
+# ArXiv Research → Agent Notes Pipeline
 
 ## When to Use
+Process arXiv PDFs into Hermes agent-notes with researcher sub-agents writing implementation plans.
 
-Process a batch of arXiv PDFs into structured research notes with implementation plans. Each paper gets its own researcher agent that reads the paper and writes a plan.
+## Steps
 
-## Step 1 — Download PDFs
-
-Download PDFs to a local directory:
-
+### 1. Archive PDFs
+Download PDFs to `<AGENT_NOTES>/arxiv-pdfs/`.
 ```bash
-mkdir -p ./papers
-# Download each PDF with curl or wget
-curl -sL "https://arxiv.org/pdf/2402.03300.pdf" -o "./papers/2402.03300.pdf"
+mkdir -p <AGENT_NOTES>/arxiv-pdfs
+# Download each PDF with curl/wget
 ```
 
-## Step 2 — Extract Content
+### 2. Extract Content
+- **Primary**: `web_extract` on arXiv abstract page (more reliable than marker)
+  - URL pattern: `https://arxiv.org/abs/XXXXX.XXXXX` → extract abstract
+  - Then download the HTML for additional metadata
+- **Fallback**: `marker.single` on PDF for full text extraction
+  - Resource-heavy; run sequentially, not in parallel
+  - Activate venv first: `source ~/.venv/marker/bin/activate`
+  - Run with: `marker.single /path/to/pdf --output_dir /path/to/output --output_format markdown`
 
-### Text-based PDFs (most arXiv papers)
+## Spawn Researchers: delegate_task with tasks=[] (one paper per task, max 3 concurrent)
 
-Use `pymupdf4llm` — fast, reliable, no GPU needed:
+Use `delegate_task` with the `tasks` array — one task entry per paper. Each sub-agent gets ONE paper. Max 3 concurrent.
 
-```bash
-pip install pymupdf4llm -q
-
-python3 -c "
-import pymupdf4llm, pymupdf, sys, os
-pdf = sys.argv[1]
-out = sys.argv[2]
-doc = pymupdf.open(pdf)
-md = pymupdf4llm.to_markdown(doc)
-os.makedirs(os.path.dirname(out), exist_ok=True)
-with open(out, 'w') as f: f.write(md)
-print(f'Wrote {len(md)} chars')
-" \"\$PDF\" \"\$OUTPUT.md\"
-```
-
-Batch convert all PDFs in a folder:
-
-```bash
-for f in ./papers/*.pdf; do
-  python3 -c "
-import pymupdf4llm, pymupdf, sys
-doc = pymupdf.open('$f')
-md = pymupdf4llm.to_markdown(doc)
-with open(\"\${f%.pdf}.md\", 'w') as out: out.write(md)
-print(f'Done: $f')
-"
-done
-```
-
-### Abstract pages (fast alternative)
-
-If full PDF extraction is unnecessary, `web_extract` on the abstract page gives metadata + abstract quickly:
-
-```bash
-web_extract(urls=["https://arxiv.org/abs/2402.03300"])
-```
-
-## Step 3 — Spawn Researcher Agents
-
-Use `delegate_task` with one task per paper. Max **3 concurrent** agents per batch.
-
-**Correct pattern — one task per paper, max 3:**
+⚠️ Common mistake: put all papers in a single `goal` string and let one agent handle them all. Correct pattern:
 
 ```python
 delegate_task(
     tasks=[
-        {
-            "goal": (
-                "Read the paper at ./papers/2402.03300.md. "
-                "Write a research summary and implementation plan to ./plans/2402.03300/PLAN.md. "
-                "Structure: Research Summary, Key Techniques, Skills Needed, "
-                "Memory Updates, Hermes Config Changes, Next Steps."
-            )
-        },
-        {
-            "goal": (
-                "Read the paper at ./papers/2401.09876.md. "
-                "Write a research summary and implementation plan to ./plans/2401.09876/PLAN.md. "
-                "Structure: Research Summary, Key Techniques, Skills Needed, "
-                "Memory Updates, Hermes Config Changes, Next Steps."
-            )
-        },
-        {
-            "goal": (
-                "Read the paper at ./papers/2403.15632.md. "
-                "Write a research summary and implementation plan to ./plans/2403.15632/PLAN.md. "
-                "Structure: Research Summary, Key Techniques, Skills Needed, "
-                "Memory Updates, Hermes Config Changes, Next Steps."
-            )
-        },
+        {"goal": "Read paper A. Write plan to <AGENT_NOTES>/projects/slug-a/PLAN.md"},
+        {"goal": "Read paper B. Write plan to <AGENT_NOTES>/projects/slug-b/PLAN.md"},
+        {"goal": "Read paper C. Write plan to <AGENT_NOTES>/projects/slug-c/PLAN.md"},
     ],
     max_iterations=50
 )
 ```
 
-**Wrong pattern — don't do this:** putting all papers in a single goal string and letting one agent handle them all.
+Each task gets its own sub-agent with isolated context. Max 3 per batch.
 
-After each batch completes, spawn the next batch.
+### Project Folder Naming
+Use `<topic-slug>-YYYY-MM/` format for project folders, e.g., `skill-improvement-2026-04/`.
 
-## Step 4 — Commit
+### Researcher Output Structure
+Each researcher sub-agent writes:
+- `PLAN.md` to the project folder — structure: **Research Summary, Skills, Memory, Hermes Config/SOUL Changes, Next Steps**
+- `notes/<paper-id>.md` with paper notes
 
+After all researchers finish:
 ```bash
-git add plans/
-git commit -m "Research: <topic> papers — $(date +%Y-%m-%d)"
+cd <AGENT_NOTES>
+git add projects/<new-folders>
+git commit -m "Research: <topic> papers"
 git push
 ```
 
-## Directory Structure
+## Known Issues
+- Marker parallel runs fail; run sequentially on Linux/CUDA only
+- Marker venv activation needed before use on Linux
+- Marker FAILS on M4 Macs — use pymupdf4llm instead (see marker-pdf-conversion skill)
+- web_extract on abstract pages is faster and more reliable than full PDF extraction
 
-```
-.
-├── papers/              # Raw PDFs and extracted markdown
-│   ├── 2402.03300.pdf
-│   └── 2402.03300.md
-└── plans/              # Researcher output
-    ├── 2402.03300/
-    │   └── PLAN.md
-    └── ...
-```
-
-## Notes
-
-- pymupdf4llm works on all platforms including M4 Macs
-- Run PDF conversions sequentially (parallel runs can OOM on large papers)
-- web_extract on abstract pages is faster and more reliable than full PDF for metadata-only use

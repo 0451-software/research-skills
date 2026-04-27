@@ -3,10 +3,6 @@ name: arxiv
 description: Search and retrieve academic papers from arXiv using their free REST API. No API key needed. Search by keyword, author, category, or ID. Combine with web_extract or the ocr-and-documents skill to read full paper content.
 version: 1.0.0
 license: MIT
-source: https://arxiv.org
-metadata:
-  tags: [Research, Arxiv, Papers, Academic, Science, API]
-  related_skills: [ocr-and-documents]
 ---
 
 # arXiv Research
@@ -254,7 +250,7 @@ curl -s "https://api.semanticscholar.org/graph/v1/author/search?query=Yann+LeCun
 | API | Rate | Auth |
 |-----|------|------|
 | arXiv | ~1 req / 3 seconds | None needed |
-| Semantic Scholar | 1 req / second | None (100/sec with API key) |
+| Semantic Scholar | 1 req / second | 10/sec with API key (free at api.semanticscholar.org) |
 
 ## Notes
 

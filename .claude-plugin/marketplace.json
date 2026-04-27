@@ -94,6 +94,21 @@
       "name": "trip-prep-research",
       "source": "./trip-prep-research",
       "description": "Comprehensive trip research pipeline: multi-agent delegation, mobile-formatted markdown output, format linter, and QA. For planning any trip from a task-list entry."
+    },
+    {
+      "name": "blogwatcher",
+      "source": "./blogwatcher",
+      "description": "Monitor blogs and RSS/Atom feeds for updates using the blogwatcher-cli tool. Add blogs, scan for new articles, track read status, and filter by category."
+    },
+    {
+      "name": "polymarket",
+      "source": "./polymarket",
+      "description": "Query Polymarket prediction market data — search markets, get prices, orderbooks, and price history. Read-only via public REST APIs, no API key needed."
+    },
+    {
+      "name": "research-paper-writing",
+      "source": "./research-paper-writing",
+      "description": "End-to-end pipeline for writing ML/AI research papers — from experiment design through analysis, drafting, revision, and submission. Covers NeurIPS, ICML, ICLR, ACL, AAAI, COLM."
     }
   ]
 }
