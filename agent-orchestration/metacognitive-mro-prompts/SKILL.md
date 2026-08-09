@@ -1,6 +1,6 @@
 ---
 name: metacognitive-mro-prompts
-description: "Metacognitive monitoring and regulation prompts for Hermes agents. Use when an agent needs to self-evaluate reasoning quality, catch cognitive biases, revise plans mid-execution, or recover from dead-ends. NOT a skill for end-user consumption — it is a prompt library for agent self-regulation."
+description: "Cognitive monitoring and regulation prompts for AI agents. Use when an agent needs to self-evaluate reasoning quality, catch cognitive biases, revise plans mid-execution, or recover from dead-ends. NOT a skill for end-user consumption — it is a prompt library for agent self-regulation."
 ---
 
 # Metacognitive MRO Prompts
@@ -165,7 +165,7 @@ Spawn focused sub-agent with RCA prompt when primary task fails. Set context to 
 Auto-apply on non-trivial tasks:
 
 - **D1 (Complexity):** 3+ phases or 5+ tool calls → delegate subsequent phases to persona-agent
-- **D2 (Expertise):** Research, adversarial review, verification → use `persona-researcher` / `persona-adversarial-reviewer` / `persona-inspector`
+- **D2 (Expertise):** Research, adversarial review, verification → use `persona-researcher` / `persona-adversarial-review` / `persona-inspector`
 - **D3 (Parallelization):** Independent workstreams → batch delegate up to 3 sub-agents concurrently
 - **D4 (Escalation):** Failure mode, high uncertainty, or blocked → delegate with full context
 

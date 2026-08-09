@@ -3,7 +3,7 @@
   "owner": {
     "name": "0451 Software"
   },
-  "description": "A collection of skills for AI agents focused on research: paper discovery, reading, note-taking, and research-grounded planning techniques.",
+  "description": "A collection of skills for AI agents focused on research-grounded techniques and reusable agent orchestration patterns.",
   "plugins": [
     {
       "name": "uncertainty-quantification-conactu",
@@ -16,24 +16,9 @@
       "description": "Embodied agent planning with integrated safety intention (SI) scoring and orthogonal feasibility+safety checks. For robots, vehicles, drones, game agents."
     },
     {
-      "name": "arxiv",
-      "source": "./arxiv",
-      "description": "Search and retrieve academic papers from arXiv using their free REST API. No API key needed. Search by keyword, author, category, or ID."
-    },
-    {
-      "name": "arxiv-research-to-agent-notes",
-      "source": "./arxiv-research-to-agent-notes",
-      "description": "Process arXiv PDFs into agent-notes — pymupdf4llm conversion, spawn 1 researcher per paper, max 3 concurrent, commit plans immediately."
-    },
-    {
-      "name": "llm-wiki",
-      "source": "./llm-wiki",
-      "description": "Karpathy's LLM Wiki — build and maintain a persistent, interlinked markdown knowledge base from LLM-related sources."
-    },
-    {
       "name": "research-paper-to-agent-plan",
       "source": "./research-paper-to-agent-plan",
-      "description": "Convert research PDFs to markdown (pymupdf4llm, not marker on M4), spawn researcher sub-agents, commit plans to agent-notes."
+      "description": "Convert research PDFs to markdown via a single command, then delegate to researcher sub-agents to produce implementation plans."
     },
     {
       "name": "agent-delegation-strategy",
@@ -41,14 +26,14 @@
       "description": "When and how to delegate non-trivial work to specialized persona sub-agents. Covers delegation triggers, context preparation, and result synthesis."
     },
     {
-      "name": "embodied-safety-eval",
-      "source": "./agent-orchestration/embodied-safety-eval",
-      "description": "Safety evaluation for embodied agent plans — pre-execution checks for plans involving physical actions, tool use, or environment modification."
-    },
-    {
       "name": "faberlens-hardened-skills",
       "source": "./agent-orchestration/faberlens-hardened-skills",
       "description": "Apply Faberlens behavioral safety hardening to skills by comparing against the hardened-skills repo and selectively adopting guardrails."
+    },
+    {
+      "name": "fantasia-aware-agent",
+      "source": "./agent-orchestration/fantasia-aware-agent",
+      "description": "Fantasia-aware agent routing: prevent premature commitment to underspecified user intent. Four modes — Expand, Elicit, Support, Generate."
     },
     {
       "name": "metacognitive-mro-prompts",
@@ -58,22 +43,22 @@
     {
       "name": "persona-adversarial-review",
       "source": "./agent-orchestration/persona-adversarial-review",
-      "description": "Adversarial red-team persona — find failure modes, stress-test assumptions, play devil's advocate."
+      "description": "Adversarial red-team persona — find failure modes, stress-test assumptions, play devil's advocate. Phase 2.7/4.5/6."
     },
     {
       "name": "persona-engineer",
       "source": "./agent-orchestration/persona-engineer",
-      "description": "Implementation persona — build working code with tests, practical and opinionated."
+      "description": "Implementation persona — build working code with tests, practical and opinionated. Phase 2/3."
     },
     {
       "name": "persona-inspector",
       "source": "./agent-orchestration/persona-inspector",
-      "description": "QA/inspection persona — verification, anti-pattern detection, challenge gate."
+      "description": "QA/inspection persona — verification, anti-pattern detection, challenge gate. Phase 2.5/4."
     },
     {
       "name": "persona-researcher",
       "source": "./agent-orchestration/persona-researcher",
-      "description": "Research persona — deep dives, literature synthesis, domain reconnaissance."
+      "description": "Research persona — deep dives, literature synthesis, domain reconnaissance. Phase 0/1."
     },
     {
       "name": "psmas-dag-to-phases",
@@ -89,11 +74,6 @@
       "name": "self-refinement-loop",
       "source": "./agent-orchestration/self_refinement_loop",
       "description": "Self-refinement loop using MRO three-role factorization — Monitor/Reasoner/Controller for iterative response improvement."
-    },
-    {
-      "name": "trip-prep-research",
-      "source": "./trip-prep-research",
-      "description": "Comprehensive trip research pipeline: multi-agent delegation, mobile-formatted markdown output, format linter, and QA. For planning any trip from a task-list entry."
     }
   ]
 }

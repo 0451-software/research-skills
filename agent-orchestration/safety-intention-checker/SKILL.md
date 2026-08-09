@@ -3,9 +3,8 @@ name: safety-intention-checker
 description: "Evaluate whether a task request reflects a benign, ambiguous, or potentially harmful intention before the agent takes any action. Use when: (1) a user request could be interpreted multiple ways, (2) the request involves sensitive capabilities (code execution, file modification, external API calls), (3) the user expresses frustration or urgency that deviates from normal patterns, (4) the request lacks sufficient context to determine safety. NOT for: routine confirmed-safe operations, or when the user has already established a trusted context. NOT a substitute for capability-level guardrails — this is a pre-action semantic check."
 version: 1.0.0
 metadata:
-  hermes:
-    tags: [safety, security, intention-check, risk-assessment]
-    category: security
+  tags: [safety, security, intention-check, risk-assessment]
+  category: security
 ---
 
 # Safety Intention Checker
