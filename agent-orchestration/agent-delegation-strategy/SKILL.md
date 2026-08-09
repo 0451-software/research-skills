@@ -1,6 +1,6 @@
 ---
 name: agent-delegation-strategy
-description: "When and how to delegate non-trivial work to specialized persona sub-agents. guide for the orchestrator-worker pattern — covers delegation triggers, context preparation, persona selection, phase workflow, spawn depth, and result synthesis. Use when deciding whether to handle a task yourself or spawn a sub-agent."
+description: "When and how to delegate non-trivial work to specialized persona sub-agents. Guide for the orchestrator-worker pattern — covers delegation triggers, context preparation, persona selection, phase workflow, spawn depth, and result synthesis. Use when deciding whether to handle a task yourself or spawn a sub-agent."
 version: 1.2.0
 category: strategy
 ---
@@ -58,10 +58,10 @@ Before delegating, prepare the following — the more complete, the better the s
 | Challenging/approving a proposal before building | `persona-inspector` | 2.5 |
 | Building/implementing code or config | `persona-engineer` | 3 |
 | Verifying/test and confirm work | `persona-inspector` | 4 |
-| Red-teaming / stress-testing a plan, code, or architecture | `persona-adversarial-reviewer` | 2.7, 4.5, 6 |
-| Final merge review | the agent (main) | 5 |
+| Red-teaming / stress-testing a plan, code, or architecture | `persona-adversarial-review` | 2.7, 4.5, 6 |
+| Final merge review | orchestrator (main agent) | 5 |
 
-**Persona skill references:** Each persona skill (`persona-researcher`, `persona-engineer`, `persona-inspector`, `persona-adversarial-reviewer`) has detailed guidance on toolsets and goal structures. Load the relevant persona skill before delegating.
+**Persona skill references:** Each persona skill (`persona-researcher`, `persona-engineer`, `persona-inspector`, `persona-adversarial-review`) has detailed guidance on toolsets and goal structures. Load the relevant persona skill before delegating.
 
 ## Phase-Gated Workflow
 
@@ -70,14 +70,14 @@ For implementation tasks (code, config, infra) — not every phase is always nee
 ```
 Phase 0:  Researcher   → Scout: monitor landscape, gather context
 Phase 1:  Researcher   → Survey: systematic research, options analysis
-Phase 2:  Engineer     → Propose: post approach in group
+Phase 2:  Engineer     → Propose: post approach for review
 Phase 2.5: Inspector   → Challenge Gate: binding veto (must score 13+/20)
 Phase 2.7: Adversarial  → Pre-Implementation Red Team: attack the proposal
          [BLOCKER: Phase 2.7 CRITICAL/HIGH findings must be addressed before Phase 3]
 Phase 3:  Engineer     → Implement: build it, ship working code
 Phase 4:  Inspector    → Verify: test and confirm
 Phase 4.5: Adversarial  → Post-Implementation Red Team: break the verified work
-Phase 5:  the agent (main) → Merge: final review and synthesis
+Phase 5:  orchestrator (main agent) → Merge: final review and synthesis
 Phase 6:  Adversarial   → On-demand Plan/Architecture Red Team
 ```
 
@@ -126,18 +126,18 @@ Sub-agents write files and commit them directly — do NOT return file content i
 **Required pattern for every delegation that produces a file output:**
 1. Delegate with explicit output file path in the goal
 2. Sub-agent writes the file to disk
-3. Sub-agent runs `cd ~/workspace/source/{repo} && git add {file} && git commit -m "{descriptive message}"`
+3. Sub-agent commits the file (e.g., `git add <file> && git commit -m "<descriptive message>"`)
 4. Sub-agent returns ONLY: commit SHA + file path + one-paragraph summary
 
-**Verification:** Before returning, confirm the file exists at the target path with `ls {path}`.
+**Verification:** Before returning, confirm the file exists at the target path (e.g., `ls <path>` or platform-equivalent check).
 
 ### Pushing After Batch Completion
 
-After a parallel batch completes, push once from the repo root:
+After a parallel batch completes, push once from the project root:
 ```bash
-cd ~/workspace/source/{repo} && git push git@github.com/{org}/{repo}.git refs/heads/main
+git push <remote> <branch>
 ```
-The final push from the agent after the batch ensures all commits reach origin.
+The final push from the orchestrator after the batch ensures all commits reach the remote.
 
 ### Per-Task File Targeting in Batch Mode
 
@@ -146,7 +146,7 @@ Each sub-agent in a batch must write to a **different output file**. Never have 
 ### Reading Shared Sources in Batch Mode
 
 When all sub-agents read the same source files:
-- Use `ctx_multi_read` for the initial read — handles compression efficiently
+- Use a multi-file batch read for the initial read — handles compression in one call
 - Cache reads locally; don't re-read redundantly
 - If a sub-agent needs to re-read after writing, use `ctx_read` with `fresh=true`
 
@@ -158,39 +158,17 @@ When all sub-agents read the same source files:
 
 ---
 
-## lean-ctx Conventions
+## Context Efficiency for Sub-Agents
 
-Sub-agents have access to lean-ctx MCP tools. Use them efficiently — they compress and cache, reducing token costs.
+Sub-agents run in isolated contexts, so they don't inherit the orchestrator's read cache. The cheapest way to keep sub-agent work efficient is to pass relevant excerpts (or pointers to specific files/lines) in the delegation context rather than have sub-agents re-read or re-discover the source material.
 
-| Situation | Tool | Why |
-|-----------|------|-----|
-| Reading 3+ files in one wave | `ctx_multi_read` | Batch compress, single call |
-| Reading one file (warm) | `ctx_smart_read` | Auto-selects optimal mode |
-| Reading one file fresh (after a write) | `ctx_read` with `fresh=true` | Bypasses cache |
-| Searching code/symbols | `ctx_search` / `ctx_semantic_search` | Regex or BM25+embeddings |
-| Directory tree | `ctx_tree` | File counts, depth |
-| Symbol outline (functions, structs) | `ctx_outline` | Fewer tokens than full file |
-| Single function/method | `ctx_symbol` | 90–97% fewer tokens vs full file |
-| Batch reads with line ranges | `ctx_read` with `mode='lines:N-M'` | Range reads bypass cache |
+**General best practices (platform-agnostic):**
+1. Read source material once at the orchestrator and pass relevant excerpts via context.
+2. Prefer targeted reads (line ranges, function signatures) over full-file reads when only a section is needed.
+3. Batch reads into a single call when your platform supports it.
+4. If your agent integrates with a context-compression tool (e.g., for symbol outlines, semantic search, or compressed-read modes), use it for large files that would otherwise dominate the sub-agent's context.
 
-**Compression modes** (`ctx_read` mode parameter):
-
-| Mode | Use When |
-|------|----------|
-| `full` (default) | Need complete file |
-| `map` | Context-only files — just the substance |
-| `signatures` | Only function/class signatures |
-| `diff` | Changed files only |
-| `lines:N-M` | Specific line range |
-
-**Best practices:**
-1. Read source material once per wave via `ctx_multi_read`
-2. Use `ctx_smart_read` for initial reads — auto-selects optimal mode
-3. Use `ctx_outline` before `ctx_read` on large files — get symbols first
-4. Prefer `ctx_symbol` over `ctx_read` when you only need one function
-5. Use `ctx_search` for grep tasks — compressed output
-
-For full lean-ctx reference, see `lean-ctx` skill.
+If your agent does not have a context-compression tool, the same conventions still apply — reduce what the sub-agent must read.
 
 ---
 
@@ -226,7 +204,7 @@ You can run up to 3 sub-agents in parallel. Only parallelize tasks that are trul
 ### Mistake 6: Ambiguous domain names in research delegations
 "research-skills" could mean skills *about* research OR skills *derived from* AI research. A sub-agent picks one — usually the wrong one.
 
-**Fix:** Clarify with G first, or give explicit examples of what you want AND what to exclude.
+**Fix:** Clarify with the user first, or give explicit examples of what you want AND what to exclude.
 
 ### Mistake 7: Not pre-flighting external services
 Sending a sub-agent to call `image_generate`, `video_transcribe`, or any external API without testing first wastes tokens on garbage output.
@@ -272,48 +250,34 @@ Delegate to a human when:
 
 Most delegation does not need this. Flat the agent → persona is the standard pattern.
 
-### Concurrent Children
+When sub-agents run concurrently, they may read or write overlapping files. To avoid mangled edits:
 
-`max_concurrent_children` defaults to **3**. Set higher for embarrassingly parallel workloads (e.g., multiple independent research tasks). Set to 1 for tightly coupled sequential work where parallel dispatch would cause file conflicts.
+- Avoid parallel sub-agents editing the same file — serialize through one sub-agent
+- Set concurrency to 1 for tightly coupled file operations
+- Re-read files before editing after a sub-agent completes if your wave touched them earlier
 
----
-
-## Cross-Agent File State Coordination
-
-Hermes tracks file access across concurrent sub-agents via `FileStateRegistry` (process-wide singleton). This prevents mangled edits when multiple sub-agents touch the same file.
-
-| Layer | Purpose |
-|-------|---------|
-| Sub-agent reads a file | Tracked with `partial=True` if offset/limit was used |
-| Sub-agent writes a file | Locked per-path; checks if a sibling sub-agent wrote since our last read |
-| Sub-agent completes | Parent warned if child modified files parent had read |
-
-When a sub-agent writes to a path that another concurrent sub-agent had already read, you'll see:
-```
-[NOTE: subagent modified files the parent previously read — re-read before editing: X, Y]
-```
-
-**Opting out:** Set `HERMES_DISABLE_FILE_STATE_GUARD=1` to disable all checks (useful for single-threaded workloads or performance-sensitive batch ops).
-
-**Best practices:**
+**Best practices for platforms that track file state across sub-agents:**
 1. Avoid parallel sub-agents editing the same file — serialize through one sub-agent
-2. Set `max_concurrent_children=1` for coupled file operations
+2. Set concurrency to 1 for coupled file operations
 3. Re-read files before editing after a sub-agent completes if you touched them earlier
+4. If your platform provides a process-wide file-state registry, prefer it; otherwise, track reads/writes manually in the orchestrator's notes
 
 ---
 
 ## Pitfalls
 
-### ACP Transport Sub-Agent Failure
-When delegating with `acp_command: "claude"` (ACP transport), sub-agents may fail to start if GitHub Copilot CLI isn't installed — the failure is silent and reports as a timeout or `max_iterations`.
+### Sub-Transport Failures
 
-**Symptoms:** Sub-agent returns `Could not start Copilot ACP command 'claude'. Install GitHub Copilot CLI or set HERMES_COPILOT_ACP_COMMAND/COPILOT_CLI_PATH.` after retries.
+If your platform offers optional sub-agent transports (e.g., an external CLI runner, an ACP bridge, a different model provider), they may fail to start if the required binary isn't installed. The failure is often silent and surfaces as a timeout or `max_iterations` error.
 
-**Fix:** Retry the same `delegate_task` call without `acp_command` and `acp_args` — use the default Hermes transport instead. ACP is optional; Hermes transport works for all sub-agent workloads.
+**Symptoms:** Sub-agent returns a "could not start <transport>" or "install <binary> or set <config>" error after retries.
 
-**Prevention:** Default to Hermes transport. Only set `acp_command` when the task specifically requires Copilot CLI features.
+**Fix:** Retry the same `delegate_task` call without the optional transport parameters — use the platform's default transport instead. Optional transports are just that — optional; the default transport works for all sub-agent workloads.
+
+**Prevention:** Default to your platform's default transport. Only opt into an alternative transport when the task specifically requires its features.
 
 ### Parallel Sub-Agents Editing the Same File
+
 If multiple parallel sub-agents write to the same file, edits can be lost or mangled.
 
 **Symptoms:** One sub-agent's changes disappear; git shows only one set of modifications.
@@ -328,5 +292,5 @@ If multiple parallel sub-agents write to the same file, edits can be lost or man
 - `persona-researcher` — Phase 0–1 research workflow
 - `persona-engineer` — Phase 2–3 implementation workflow
 - `persona-inspector` — Phase 2.5/4 challenge gate workflow
-- `persona-adversarial-reviewer` — Phase 2.7/4.5/6 red team workflow
+- `persona-adversarial-review` — Phase 2.7/4.5/6 red team workflow
 - `psmas-dag-to-phases` — DAG-to-executable-phase conversion for complex task graphs

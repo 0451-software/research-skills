@@ -1,6 +1,6 @@
 ---
 name: research-paper-to-agent-plan
-description: Convert research PDFs to markdown, spawn researcher sub-agents, produce implementation plans.
+description: Convert research PDFs to markdown, then delegate to researcher sub-agents to produce implementation plans. Use when papers need to be ingested and translated into actionable plans for an agent team.
 version: 1.0.0
 license: MIT
 ---
@@ -9,13 +9,13 @@ license: MIT
 
 ## When to Use
 
-Convert research PDFs to markdown, then spawn researcher agents to read them and produce implementation plans.
+Convert research PDFs to markdown, then spawn researcher sub-agents (one per paper) to read them and produce implementation plans. Used to bootstrap a body of in-progress plans from a research corpus.
 
 ## Step 1 — Convert PDFs to Markdown
 
-### M4 Mac / text-based PDFs
+### Text-based, digitally-generated PDFs
 
-Use `pymupdf4llm` (marker fails on M4 Macs):
+On most systems, `pymupdf4llm` is the fastest and most reliable choice for cleanly extracted PDFs:
 
 ```bash
 pip install pymupdf4llm -q
@@ -29,7 +29,7 @@ md = pymupdf4llm.to_markdown(doc)
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
 with open(out_path, 'w') as f: f.write(md)
 print(f'Wrote {len(md)} chars to {out_path}')
-" \"\$PDF\" \"\$OUTPUT.md\"
+" "$PDF" "$OUTPUT.md"
 ```
 
 Batch convert:
@@ -40,14 +40,14 @@ for f in ./research-pdfs/*.pdf; do
 import pymupdf4llm, pymupdf, sys
 doc = pymupdf.open('$f')
 md = pymupdf4llm.to_markdown(doc)
-with open('\${f%.pdf}.md', 'w') as out: out.write(md)
+with open('${f%.pdf}.md', 'w') as out: out.write(md)
 "
 done
 ```
 
-### Scanned PDFs or papers with LaTeX equations
+### Scanned PDFs or papers with heavy LaTeX equations
 
-Use [Marker](https://github.com/VikParuchuri/marker) on a Linux/CUDA machine:
+Use [Marker](https://github.com/VikParuchuri/marker) when better OCR or LaTeX fidelity is required. Marker needs a CUDA-capable Linux machine to run at full speed:
 
 ```bash
 uvx --from marker-pdf[all] marker_single /path/to/paper.pdf \
@@ -56,13 +56,16 @@ uvx --from marker-pdf[all] marker_single /path/to/paper.pdf \
   --disable_image_extraction
 ```
 
-Marker produces superior LaTeX rendering and handles scanned documents.
+Marker produces superior LaTeX rendering and handles scanned documents where `pymupdf4llm` would return empty text.
 
-## Step 2 — Spawn Researcher Agents
+### File-size guidance
 
-Spawn using a **researcher persona**. Each agent reads one paper markdown and writes an implementation plan.
+- **Under 50 MB total** (small corpus): `pymupdf4llm` is fine. Sequential is safe.
+- **Hundreds of PDFs or large files**: convert sequentially, not in parallel — `pymupdf4llm` and `marker` are memory-hungry and concurrent runs can OOM.
 
-**Max 3 concurrent.** Batch spawn, wait, repeat.
+## Step 2 — Spawn Researcher Sub-Agents
+
+Delegate using a **researcher persona**. Each sub-agent reads one paper markdown and writes an implementation plan.
 
 ```python
 delegate_task(
@@ -80,7 +83,10 @@ delegate_task(
 )
 ```
 
-Plan folder naming: `<topic-slug>-YYYY-MM/`
+Conventions:
+- **Max concurrency** — batch up to 3 sub-agents at a time. Plan files are tiny, but reading + planning is the bottleneck.
+- **Plan folder naming** — `<topic-slug>-YYYY-MM/`
+- **Output format** — markdown outline with the agreed sections, written to a path inside `plans/`.
 
 ## Step 3 — Commit
 
@@ -105,6 +111,6 @@ git push
 
 ## Notes
 
-- pymupdf4llm is the default on M4 Macs — marker OOMs
-- Run PDF conversions sequentially, not in parallel
 - If using the arXiv API, download PDFs with: `curl -sL "https://arxiv.org/pdf/{id}.pdf" -o "{id}.pdf"`
+- Run PDF conversions sequentially, not in parallel, to avoid memory pressure.
+- For very large corpora, consider chunking the conversion into overnight batches.

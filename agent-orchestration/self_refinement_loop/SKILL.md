@@ -3,9 +3,8 @@ name: self_refinement_loop
 description: "Self-refinement loop skill using MRO (Monitor/Reasoner/Controller) three-role factorization. Use when iteratively improving a response, catching errors before they propagate, or recovering from dead-ends. Integrates with metacognitive-mro-prompts templates for structured self-regulation."
 version: 1.0.0
 metadata:
-  hermes:
-    tags: [reasoning, self-improvement, loop, metacognition, MRO]
-    category: strategy
+  tags: [reasoning, self-improvement, loop, metacognition, MRO]
+  category: strategy
 ---
 
 # Self-Refinement Loop (MRO)
