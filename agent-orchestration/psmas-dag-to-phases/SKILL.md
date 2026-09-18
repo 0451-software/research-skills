@@ -152,7 +152,7 @@ Deviation from plan: {deviation_description}
 
 VALIDATION_RESULT: PASS | FAIL | CONDITIONAL_PASS
 ADAPTATION_REQUIRED: YES | NO
-ADAPTATION_TYPE: <replan | skip | defer | rollback | escalate>
+ADAPTATION_TYPE: <retry | replan | skip | defer | rollback | escalate>
 ```
 
 ### Template C — DAG Repair After Failure
@@ -166,32 +166,58 @@ DEPENDENTS_AFFECTED: {list of tasks blocked by this failure}
 CURRENT_PHASE: {phase_number}
 
 ## Repair Options
-Rank the following options and select the best:
+Rank the following options and select the best. Each option is one of the six
+adaptation kinds, and the letters map as: A → skip, B → retry, C → replan,
+D → defer, E → rollback.
 
-OPTION_A — Skip and continue:
-  Skip failed node, mark dependents as handled (if possible), continue pipeline.
+OPTION_A — skip:
+  Proceed without the failed node, mark dependents as handled (if possible), continue pipeline.
   Tradeoff: may produce incomplete output; downstream quality risk.
 
-OPTION_B — Retry:
-  Retry failed node with same or modified parameters.
+OPTION_B — retry:
+  Re-run the failed node with the same parameters.
   Tradeoff: may fail again if root cause is systemic; time cost.
 
-OPTION_C — Substitute:
-  Use an alternative task or approach that achieves the same goal.
+OPTION_C — replan:
+  Keep the goal, change the approach for the affected subtree: use an alternative
+  task or approach that achieves the same goal.
   Tradeoff: requires re-planning; may change output semantics.
 
-OPTION_D — Defer:
-  Pause the pipeline at this point, escalate to human review.
-  Tradeoff: breaks automation; ensures human oversight.
+OPTION_D — defer:
+  Pause this branch, keep other work running.
+  Tradeoff: delays the deferred branch; partial pipeline output until it resumes.
 
-OPTION_E — Rollback:
-  Roll back to the last valid checkpoint and re-execute from there.
+OPTION_E — rollback:
+  Return to the last valid checkpoint and re-execute from there.
   Tradeoff: time cost; may fail at same point if root cause is in prior phase.
 
 SELECTED_OPTION: <A|B|C|D|E>
+ADAPTATION_KIND: <retry | replan | skip | defer | rollback>
 RATIONALE: <why this is the best choice given failure mode and constraints>
 REVISED_PIPELINE: <updated phase/task list if different from original>
 ```
+
+### Adaptation vocabulary
+
+Template B's `ADAPTATION_TYPE` and Template C's `SELECTED_OPTION` name the same
+six kinds:
+
+| Kind | Meaning |
+|------|---------|
+| `retry` | Re-run the failed work with the same parameters |
+| `replan` | Keep the goal, change the approach for the affected subtree |
+| `skip` | Proceed without it; dependents absorb the loss |
+| `defer` | Pause this branch, keep other work running |
+| `rollback` | Return to the last valid checkpoint and re-execute |
+| `escalate` | Hand the decision to a human |
+
+`substitute` (formerly Template C OPTION_C) folded into `replan`: picking an
+alternative task or approach that reaches the same goal *is* a change of
+approach for the affected subtree, not a distinct kind of decision. Template C
+never offers `escalate` as a lettered option — it is only reachable through
+Template B's `ADAPTATION_TYPE`. Keeping one closed set of six means a repair
+decision carries the same name whether it was selected mid-execution (Template B)
+or after a failure (Template C), so the two templates cannot disagree.
 
 ## Pitfalls
 
@@ -234,7 +260,7 @@ invoke them separately.
 
 2. **Phase ordering correctness**: Verify that for every edge (A→B), phase(A) ≤ phase(B). Write a script that checks this invariant across all edges.
 
-3. **Checkpoint coverage**: For each phase, verify that entry checkpoint is achievable given the exit checkpoint of the prior phase. If not, flag the gap.
+3. **Checkpoint coverage**: For each phase, compare two independently authored lists: the exit checkpoint of the prior phase and the entry criteria declared by the tasks in this phase. A phase's entry checkpoint is the union of both, not a copy of the prior exit checkpoint, so the check can fail. Flag every entry condition that no prior exit checkpoint establishes, and treat each flagged condition as a gap in the plan rather than a defect of the checker.
 
 4. **Adaptation map completeness**: For each task node, verify there is at least one defined adaptation trigger. If a task has no failure mode defined, it cannot be recovered.
 
