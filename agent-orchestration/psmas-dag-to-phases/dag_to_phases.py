@@ -453,19 +453,29 @@ def group_by_dependency(task_ids: list[str], dag: PSMASDAG) -> tuple[list[str], 
 
 
 def generate_entry_checkpoint(phase: Phase, dag: PSMASDAG, prior_phases: list[Phase]) -> list[str]:
-    """Generate entry checkpoint conditions for a phase."""
+    """
+    Generate entry checkpoint conditions for a phase.
+
+    entry(N) = dedupe(exit(N-1) joined with the entry criteria declared by the
+    tasks in phase N).
+
+    The prior phase's exit checkpoint and this phase's own task entry criteria
+    are authored independently, so the two lists are carried separately rather
+    than one being defined in terms of the other.
+    """
     checkpoints = []
-    
-    if not prior_phases:
-        # First phase - check source task entry criteria
-        for task in phase.tasks:
-            checkpoints.extend(task.entry_criteria)
-    else:
-        # After prior phases - check exit criteria of previous phase
+
+    if prior_phases:
+        # Conditions the immediately preceding phase must have established
         prev_phase = prior_phases[-1]
         checkpoints.extend(prev_phase.exit_checkpoint)
-    
-    return list(set(checkpoints))  # Deduplicate
+
+    # Conditions the tasks in this phase declare for themselves
+    for task in phase.tasks:
+        checkpoints.extend(task.entry_criteria)
+
+    # Deduplicate, preserving order (prior exit first, then this phase's own)
+    return list(dict.fromkeys(checkpoints))
 
 
 def generate_exit_checkpoint(phase: Phase) -> list[str]:
